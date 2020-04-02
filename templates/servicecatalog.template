@@ -104,7 +104,7 @@ Resources:
       Description: "Mosaic FreezerManagement is a comprehensive and cost-effective software solution for managing and tracking all types of sample inventory, backed by a full audit trail. It provides a flexible interface to define and record properties for any type of sample or container, and manages your entire hierarchy of storage including freezers, shelves, cupboards, etc. Other features include an intuitive search interface, and expiry date tracking. IMPORTANT NOTE:  Please contact Titian at info@titian.co.uk for validation before you launch the template below, otherwise the template will fail."
       Distributor: "Titian Software Limited"
       SupportUrl: "https://www.titian.co.uk/resourcesandsupport/support-services"
-      SupportDescription: "Titian supports a worldwide customer base – including customer sites in Europe, USA and Asia. Support may be provided by email, telephone or shared Desktop sessions"
+      SupportDescription: "Titian supports a worldwide customer base – including customer sites in Europe, USA and Asia. Support may be provided by email, telephone or shared desktop sessions."
       SupportEmail: "info@titian.co.uk"
       Name: "Mosaic FreezerManagement"
       ProvisioningArtifactParameters:
