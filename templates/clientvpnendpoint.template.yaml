@@ -129,7 +129,6 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
-                                    
   rCustomLambdaResourceTrigger:
     Type: Custom::rCustomLambdaResourceTrigger
     Properties:
@@ -150,7 +149,6 @@ Resources:
           - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/clientvpnendpoint-customlambdaresource.py'
           - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-
   rClientVPNLogGroup: 
     Type: AWS::Logs::LogGroup
     Properties: 
@@ -163,7 +161,6 @@ Resources:
     Properties: 
       LogGroupName: !Ref pLogGroup
       LogStreamName: !Ref pLogStream
-
   rCreateClientVpnEndpointLambdaRole:
     DependsOn:
     - rVpnConfigBucket
