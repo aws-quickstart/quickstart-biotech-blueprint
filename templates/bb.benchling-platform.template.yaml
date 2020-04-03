@@ -15,13 +15,13 @@ Metadata:
       - pAppSubnetA
       - pAppSubnetB
       - pSecurityGroupForWebAccess
-      - pWebAccessCIDR
       - pVpcId
     - Label:
         default: AWS Quick Start Configuration
       Parameters:
       - QSS3BucketName
-      - QSS3KeyPrefix    
+      - QSS3BucketRegion
+      - QSS3KeyPrefix
     ParameterLabels:
       pInternalHostedZoneSecondLevelDomainName:
         default: Subdomain
@@ -35,8 +35,12 @@ Metadata:
         default: Web Access Security Group
       pVpcId:
         default: VPC ID
-      pWebAccessCIDR:
-        default: Web Access CIDR (No SG)
+      QSS3BucketName:
+        default: Quick Start S3 Bucket Name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      QSS3KeyPrefix:
+        default: Quick Start S3 Key Prefix
       
 Parameters: 
   pAppSubnetA:
@@ -63,33 +67,34 @@ Parameters:
     Description: VPC ID
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::VPC::Id>'
     Default: /BB/Networking/VPC/Research
-  pWebAccessCIDR:
-    Description: Will only be used if Web Access Security Group is not specified. Enter 0.0.0.0/0 if you want to open it to the world.
-    Type: String
-    Default: ""
   QSS3BucketName:
-    Default: /BB/QuickStart/QSS3BucketName
+    Default: aws-quickstart
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
     Type: 'AWS::SSM::Parameter::Value<String>'  
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
   QSS3KeyPrefix:
-    Default: /BB/QuickStart/QSS3KeyPrefix
+    Default: quickstart-biotech-blueprint/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: 'AWS::SSM::Parameter::Value<String>'     
 Conditions:
-  cEndpointServiceNameSpecified: !Not [!Equals [!Ref pPrivateLinkServiceName, ""]]
-  cNoWebAccessSG: !Equals [ !Ref pSecurityGroupForWebAccess, "" ]
-
-
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   # Benchling
   rBenchling:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-benchling-platform/templates/benchling-platform.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-benchling-platform/templates/benchling-platform.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pInternalHostedZoneSecondLevelDomainName: !Ref pInternalHostedZoneSecondLevelDomainName
         pAppSubnetA: !Ref pAppSubnetA
@@ -97,4 +102,3 @@ Resources:
         pPrivateLinkServiceName: !Ref pPrivateLinkServiceName
         pSecurityGroupForWebAccess: !Ref pSecurityGroupForWebAccess
         pVpcId: !Ref pVpcId
-      

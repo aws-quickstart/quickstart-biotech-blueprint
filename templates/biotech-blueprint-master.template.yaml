@@ -34,8 +34,9 @@ Metadata:
       - Label:
           default: AWS Quick Start Configuration
         Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
+        - QSS3BucketName
+        - QSS3BucketRegion
+        - QSS3KeyPrefix
     ParameterLabels:
       pPreclinicalVPCCidrAandBBlock:
         default: A and B CIDR Blocks for Preclinical VPC
@@ -47,6 +48,8 @@ Metadata:
         default: Notification Email Address
       QSS3BucketName:
         default: Quick Start S3 Bucket Name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       QSS3KeyPrefix:
         default: Quick Start S3 Key Prefix
       pInternalDnsSecondLevelDomain:
@@ -91,6 +94,10 @@ Parameters:
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
@@ -163,6 +170,7 @@ Mappings:
       InstanceType: m4.large
 
 Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   cLoadConfigRulesTemplate: !And [ !Equals [ !FindInMap [ RegionServiceSupport, !Ref "AWS::Region", ConfigRules ] , true ] , !Equals [ pSupportConfig , "Yes" ] ]
   cCreateClientVPNEndpoint: !Equals [ !Ref pCreateClientVPNEndpoint , "Yes" ]
   cLaunchServiceCatalogPortfolio: !Equals [ !Ref pLaunchServiceCatalogPortfolio , "Yes" ]
@@ -172,24 +180,35 @@ Resources:
   rIam:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/iam.template
-
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/iam.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      
   # Create logging config
   rLogging:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/logging.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/logging.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pNotifyEmail: !Ref pNotifyEmail
         pSupportsGlacier: !FindInMap [ RegionServiceSupport, !Ref "AWS::Region", Glacier]
-
   # Create PreclinicalVPC
   rPreclinicalVpc:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
     - rLogging
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         AvailabilityZones: !Join [ "," , !Ref pAvailabilityZones ]
         CreateAdditionalPrivateSubnets: true
@@ -213,7 +232,11 @@ Resources:
     DependsOn: 
     - rLogging
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         AvailabilityZones: !Join [ "," , !Ref pAvailabilityZones ]
         CreateAdditionalPrivateSubnets: false
@@ -234,11 +257,13 @@ Resources:
   rVpcNetworking:
     Type: AWS::CloudFormation::Stack
     DependsOn:
-    - rManagementVpc
-    - rPreclinicalVpc
     - rLogging
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/vpc-networking.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/vpc-networking.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pPreclinicalVpcId: !GetAtt rPreclinicalVpc.Outputs.VPCID
         pPreclinicalVpcCidr: !GetAtt rPreclinicalVpc.Outputs.VPCCIDR
@@ -263,7 +288,11 @@ Resources:
     - rManagementVpc
     - rLogging
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/config-rules.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-compliance-common/templates/config-rules.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pRequiredTagKey: ""
 
@@ -277,10 +306,17 @@ Resources:
     - rLogging
     - rVpcNetworking
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/clientvpnendpoint.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/clientvpnendpoint.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pClientCidr: !Ref pClientCidr
         pTargetNetworkCidr: !Ref pTargetNetworkCidr
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         
   rServiceCatalog:
     Type: AWS::CloudFormation::Stack
@@ -288,21 +324,28 @@ Resources:
     - rSystemsManager
     Condition: cLaunchServiceCatalogPortfolio
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/servicecatalog.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/servicecatalog.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         QSS3BucketName: !Ref QSS3BucketName
-        QSS3KeyPrefix:  !Ref QSS3KeyPrefix
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
         
   rSystemsManager:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - rIam
-      - rPreclinicalVpc
       - rManagementVpc
       - rLogging
-      - rVpcNetworking
     Properties:
-      TemplateURL: !Sub https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/systemsmanager.template
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/systemsmanager.template.yaml'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         pVpcResearch: !GetAtt rPreclinicalVpc.Outputs.VPCID
         pVpcResearchSubnetDmzA: !GetAtt rPreclinicalVpc.Outputs.PublicSubnet1ID

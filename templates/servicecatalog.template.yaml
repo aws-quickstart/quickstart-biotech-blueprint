@@ -8,12 +8,15 @@ Metadata:
           default: AWS Quick Start Configuration
         Parameters:
           - QSS3BucketName
-          - QSS3KeyPrefix  
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
     ParameterLabels:
       QSS3BucketName:
         default: Quick Start S3 Bucket Name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
       QSS3KeyPrefix:
-        default: Quick Start S3 Key Prefix       
+        default: Quick Start S3 Key Prefix
 Parameters:
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
@@ -25,6 +28,10 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
     Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z-/]*$
     ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
@@ -34,7 +41,8 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
     Type: String
-          
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 Resources:
   PorfolioBB:
     Type: "AWS::ServiceCatalog::Portfolio"
@@ -54,7 +62,11 @@ Resources:
       Name: ChemAxon Compound Registry
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/bb.chemaxon-registry.template"
+            LoadTemplateFromURL: 
+              !Sub
+                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/bb.chemaxon-registry.template.yaml'    
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]      
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
   ChemAxonProductAssociation:         
     Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
     Properties:
@@ -71,7 +83,11 @@ Resources:
       Name: Benchling
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/bb.benchling-platform.template"
+            LoadTemplateFromURL: 
+              !Sub
+                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/bb.benchling-platform.template.yaml'    
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]      
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
   BenchlingProductAssociation:         
     Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
     Properties:
@@ -89,7 +105,11 @@ Resources:
       Name: Nextflow
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-nextflow/templates/bb.nextflow.template"
+            LoadTemplateFromURL: 
+              !Sub
+                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-nextflow/templates/bb.nextflow.template'    
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]      
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
   NextflowProductAssociation:         
     Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
     Properties:
@@ -109,15 +129,17 @@ Resources:
       Name: "Mosaic FreezerManagement"
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-titian-mosaic/templates/bb.titian-mosaic.template"
-            
+            LoadTemplateFromURL: 
+              !Sub
+                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-titian-mosaic/templates/bb.titian-mosaic.template'    
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]      
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
   TitianProductAssociation:         
     Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
     Properties:
       PortfolioId: !Ref PorfolioBB
       ProductId: !Ref TitianMosaicProduct    
 
-      
   DotmaticsProduct:  
     Type: "AWS::ServiceCatalog::CloudFormationProduct"
     Properties:
@@ -130,11 +152,13 @@ Resources:
       Name: "Dotmatics Suite"
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-dotmatics/templates/bb.dotmatics.template"
-            
-  DotmaticsProductAssociation:         
+            LoadTemplateFromURL: 
+              !Sub
+                - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-dotmatics/templates/bb.dotmatics.template'    
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+  DotmaticsProductAssociation:
     Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
     Properties:
       PortfolioId: !Ref PorfolioBB
-      ProductId: !Ref DotmaticsProduct      
-
+      ProductId: !Ref DotmaticsProduct
