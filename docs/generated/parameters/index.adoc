@@ -1,1 +1,3 @@
-// placeholder
+
+=== Parameter for existing VPC
+include::biotech-blueprint-master.template.adoc[]

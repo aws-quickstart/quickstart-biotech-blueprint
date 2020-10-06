@@ -1,32 +1,3 @@
-[submodule "submodules/quickstart-aws-vpc"]
-	path = submodules/quickstart-aws-vpc
-	url = ../../aws-quickstart/quickstart-aws-vpc.git
-	branch = main
-[submodule "submodules/quickstart-compliance-common"]
-	path = submodules/quickstart-compliance-common
-	url = ../../aws-quickstart/quickstart-compliance-common.git
-	branch = main
-[submodule "submodules/quickstart-chemaxon-registry"]
-	path = submodules/quickstart-chemaxon-registry
-	url = ../../aws-quickstart/quickstart-chemaxon-registry.git
-	branch = main 
-[submodule "submodules/quickstart-benchling-platform"]
-	path = submodules/quickstart-benchling-platform
-	url = ../../aws-quickstart/quickstart-benchling-platform.git
-	branch = main
-
-[submodule "submodules/quickstart-nextflow"]
-	path = submodules/quickstart-nextflow
-	url = git@github.com:aws-quickstart/quickstart-nextflow.git
-	branch = main
-[submodule "submodules/quickstart-dotmatics"]
-	path = submodules/quickstart-dotmatics
-	url = ../../aws-quickstart/quickstart-dotmatics.git
-	branch = main
-[submodule "submodules/quickstart-titian-mosaic"]
-	path = submodules/quickstart-titian-mosaic
-	url = ../../aws-quickstart/quickstart-titian-mosaic.git
-	branch = main 
 [submodule "docs/boilerplate"]
 	path = docs/boilerplate
 	url = https://github.com/aws-quickstart/quickstart-documentation-base-common.git
