@@ -187,8 +187,6 @@ Parameters:
     Default: ""
   pDnsHostedZoneID:
     Description: Internal DNS hosted zone ID.
-    Type: String
-    Default: ""
     Type: 'AWS::SSM::Parameter::Value<String>'
     Default: /BB/QuickStart/DNS/HostedZoneId
   pDnsHostedZoneApexDomain:
@@ -221,7 +219,6 @@ Mappings:
       CACOMPREG18: ami-6f205217
     eu-west-1: 
       CACOMPREG18: ami-0e6f5f77
-Mappings:
   ChemAxonRegistry:
     Defaults:
       AppServerInstanceType: t2.large
