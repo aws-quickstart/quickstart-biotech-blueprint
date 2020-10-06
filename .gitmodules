@@ -27,3 +27,6 @@
 	path = submodules/quickstart-titian-mosaic
 	url = ../../aws-quickstart/quickstart-titian-mosaic.git
 	branch = main 
+[submodule "docs/boilerplate"]
+	path = docs/boilerplate
+	url = https://github.com/aws-quickstart/quickstart-documentation-base-common.git
