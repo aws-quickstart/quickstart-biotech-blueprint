@@ -1,0 +1,46 @@
+
+.DNS information
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Preferred internal 2nd level domain name
+(`pInternalDnsSecondLevelDomain`)|`corp`|What second level domain should future biotech blueprint resources use? This would be the 'mycompany' portion of mycompany.com. Default is 'corp'|Preferred internal top level domain name
+(`pInternalDnsTLDDomain`)|`com`|What TLD domain should future biotech blueprint resources use? This would be the 'com' portion of mycompany.com.
+|===
+.Networking information
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Availability Zones
+(`pAvailabilityZones`)|`**__Requires input__**`|List of Availability Zones to use for the subnets in the VPC. Only two Availability Zones are used for this deployment, and the logical order of your selections is preserved.|A and B CIDR Blocks for Preclinical VPC
+(`pPreclinicalVPCCidrAandBBlock`)|`10.82`|Preferred A and B CIDR block for Preclinical VPC. For example, this would be 10.82 in 10.82.0.0/20. Default is 10.82.|A and B CIDR Blocks for Management VPC
+(`pManagementVPCCidrAandBBlock`)|`10.81`|Preferred A and B CIDR block for Management VPC. For example, this would be 10.81 in 10.81.0.0/20. Default is 10.81.
+|===
+.Misc Options
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Notification Email Address
+(`pNotifyEmail`)|`**__Requires input__**`|Notification email address for security events (you will receive a confirmation email)|Support AWS Config
+(`pSupportConfig`)|`No`|Adds Config Rules to your deployment provided that the region supports Config Rules and you have previously deployed a Config Recorder. Default is No|Key Pair
+(`pKeyPairName`)|`**__Requires input__**`|Public/private key pairs allow you to securely connect to your NAT instance after it launches. This is used only if the region does not support NAT gateways, but still required.
+|===
+.Managed VPN
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Create an Client VPN Endpoint
+(`pCreateClientVPNEndpoint`)|`Yes`|Do want to deploy the AWS Client VPN Endpoint solution? This is a managed VPN solution to securely access the VPCs created by the quickstart.|VPN Client CIDR Range (when connected)
+(`pClientCidr`)|`11.0.0.0/16`|What CIDR range should you give your VPN clients? Leave the default if you are unsure what this is.|Inbound VPN Client CIDR Range (for ingress)
+(`pTargetNetworkCidr`)|`**__Requires input__**`|What CIDR range will your VPN clients be coming from? This could be your corporate network or 0.0.0.0/0 to make it public.
+|===
+.Biotech Blueprint Informatics Catalog
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Create Informatics Catalog?
+(`pLaunchServiceCatalogPortfolio`)|`Yes`|Do you want to make additional informatics tools available after deployment via service catalog?
+|===
+.AWS Quick Start Configuration
+[width="100%",cols="16%,11%,73%",options="header",]
+|===
+|Parameter label (name) |Default value|Description|Quick Start S3 Bucket Name
+(`QSS3BucketName`)|`aws-quickstart`|S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).|Quick Start S3 bucket region
+(`QSS3BucketRegion`)|`us-east-1`|The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.|Quick Start S3 Key Prefix
+(`QSS3KeyPrefix`)|`quickstart-biotech-blueprint/`|S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).
+|===

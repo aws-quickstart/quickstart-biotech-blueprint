@@ -1,0 +1,36 @@
+// Replace the <n> in each row to specify the number of resources used in this deployment. Remove the rows for resources that aren’t used.
+|===
+|Resource |This deployment uses
+
+// Space needed to maintain table headers
+|ConfigurationRecorder |1
+|Config Coformance Packs |4
+|Config Delivery Channels |1
+|Client Vpn Auth Rule |3
+|Client VPN Endpoint |1
+|ClientVpnRoute |4
+|ClientVpnTargetNetworkAssociation |2
+|EIP |3
+|InternetGateway |3
+|NatGateway |3
+|Route |30
+|RouteTable |16
+|SecurityGroup |1
+|Subnet |16
+|SubnetRouteTableAssociation |32
+|VPC |3
+|VPCEndpoint |2
+|VPCGatewayAttachment |2
+|VPCPeeringConnection |2
+|IAM Policy |1
+|IAM Role |2
+|Lambda Function  |1
+|LogGroup |1
+|LogStream |1
+|HostedZone |1
+|S3 Buckets |2
+|BucketPolicy |1
+|ServiceCatalog CloudFormationProduct |6
+|ServiceCatalog PortfolioProductAssociation |6
+|ServiceCatalog Portfolio |1
+|===

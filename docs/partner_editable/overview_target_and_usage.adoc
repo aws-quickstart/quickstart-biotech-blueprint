@@ -1,0 +1,11 @@
+// Replace the content in <>
+// Identify your target audience and explain how/why they would use this Quick Start.
+//Avoid borrowing text from third-party websites (copying text from AWS service documentation is fine). Also, avoid marketing-speak, focusing instead on the technical aspect.
+
+This guide provides instructions for deploying the {partner-product-short-name} Quick Start reference architecture on the AWS Cloud.
+
+This Quick Start is for Biotech startups looking for a turnkey resarch envioronment in the cloud following AWS best practices on day 1. 
+
+The {partner-product-short-name} core landing zone builds out a secure home for your future informatics and scientfic computing needs in under 15 minutes. That includes identity management and  access control, encryption, VPN, network isolation, logging, alarms, DNS, and built-in compliance auditing.  
+
+Optionally, we have also included a number of the industry's leading  informatics and computational tools from commercial and opensource communties. These tools are made available through the AWS Service Catalog after deploying the core landing zone.

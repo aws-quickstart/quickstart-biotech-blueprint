@@ -1,0 +1,52 @@
+// Add any tips or answers to anticipated questions. This could include the following troubleshooting information. If you don’t have any other Q&A to add, change “FAQ” to “Troubleshooting.”
+
+== FAQ
+
+*Q.* What VPC and Subnet should I deploy into?
+
+*A.* These are the primary landing zones for resources you deploy into AWS. You can think of VPCs as houses and the subnets as rooms. When you deploy a load balancer, EC2 instance, RDS databases, etc you will need to tell AWS what VPC and subnet it should deploy into.
+
+If the resource you want to deploy is for Production or Development purposes, make sure to use the Production or Development VPC. Separating the Production and Development VPCs allows you to manage the environments with different levels of controls and restrictions.
+
+You want to use the Management VPC only for resources that more operational in nature, like a DevOps tool, active directory, security appliance, etc. For example, the Blueprint deploys the Client VPN Endpoint into the Management VPC.
+
+All three VPCs have similar classes of subnets. Public, Private, and Isolated. When you are deploying a resource, if the resource needs to be publically addressable by the internet at large, you need to specify the Public subnet. Ideally, this should only ever be things like AWS application load balancers (ALB). If you are deploying a resource like application server that should never be directly internet facing (but perhaps sits behind an ALB) that still needs outbound internet access, use the Private subnet. If you are deploying a sensitive resource like a database that should only be addressable to your internal networks and needs no outbound internet access, use the isolated subnets.
+
+In short, when you are deploying a VPC aware resource into AWS (ALB, EC2, RDS, etc), consider first the VPC it should belong to then consider its level of isolation. Here are some examples:
+
+*Q.* Can you give me some examples of stuff I'll be launching and where it should go?
+
+*A.* Here are some common situations you might find yourself in:
+
+* Need a server where I'm going to test out installing an application to test out on my own or show to a coworker?
+** Development VPC, Private Subnet
+* Restoring an RDS snapshot in Development into Production?
+** Production VPC, Isolated Subnet
+* Launching an application load balancer to try installing a custom TLS certificate?
+** Development VPC, Public Subnet
+* Standing up a DevOps tool like Jenkins to automate deployments into Production and Development?
+** Management VPC, Private Subnet
+* Standing up and Okta Cloud Connect appliance or Active Directory?
+** Management VPC, Private Subnet
+
+*Q.* Why are there two subnets of the same class in each VPC? 
+
+*A.* This is an important requirement for high availability on AWS. Each subnet of the same class is in a different availability zone, which is to say a physically distinct data center. In the event of an availability zone outage, having another subnet in another availability zone allows your service or AWS services to cleanly failover. For example AWS auto scaling, RDS multi-az, and the Client VPN Endpoint all take advantage of multi-az capability for clean failover in the event of a physical disaster. Outside of the subnets being in different AZ, subnets of the same class are identical from a networking perspective, it really does not matter which one you choose.
+
+*Q.* I encountered a *CREATE_FAILED* error when I launched the Quick Start.
+
+*A.* If AWS CloudFormation fails to create the stack, we recommend that you relaunch the template with *Rollback on failure* set to *Disabled*. (This setting is under *Advanced* in the AWS CloudFormation console, *Options* page.) With this setting, the stack’s state is retained and the instance is left running, so you can troubleshoot the issue. (For Windows, look at the log files in %ProgramFiles%\Amazon\EC2ConfigService and C:\cfn\log.)
+// If you’re deploying on Linux instances, provide the location for log files on Linux, or omit this sentence.
+
+WARNING: When you set *Rollback on failure* to *Disabled*, you continue to incur AWS charges for this stack. Please make sure to delete the stack when you finish troubleshooting.
+
+For additional information, see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html[Troubleshooting AWS CloudFormation^] on the AWS website.
+
+*Q.* I encountered a size limitation error when I deployed the AWS CloudFormation templates.
+
+*A.* We recommend that you launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template size limitations. For more information about AWS CloudFormation quotas, see the http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html[AWS documentation^].
+
+
+== Troubleshooting
+
+<Steps for troubleshooting the deployment go here.>

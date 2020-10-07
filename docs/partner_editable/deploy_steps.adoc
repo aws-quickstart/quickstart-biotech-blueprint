@@ -1,0 +1,158 @@
+// We need to work around Step numbers here if we are going to potentially exclude the AMI subscription
+=== Sign in to your AWS account
+
+. Sign in to your AWS account at https://aws.amazon.com with an IAM user or role that has the necessary permissions. For details, see link:#_planning_the_deployment[Planning the deployment] earlier in this guide.
+. Make sure that your AWS account is configured correctly, as discussed in the link:#_technical_requirements[Technical requirements] section.
+
+NOTE: You are responsible for the cost of the AWS services used while running this Quick Start reference deployment. There is no additional cost for using this Quick Start. For full details, see the pricing pages for each AWS service used by this Quick Start. Prices are subject to change.
+
+// Optional based on Marketplace listing. Not to be edited
+ifdef::marketplace_subscription[]
+=== Subscribe to the {partner-product-short-name} AMI
+
+This Quick Start requires a subscription to the AMI for {partner-product-short-name} in AWS Marketplace.
+
+. Sign in to your AWS account.
+. {marketplace_listing_url}[Open the page for the {partner-product-short-name} AMI in AWS Marketplace], and then choose *Continue to Subscribe*.
+. Review the terms and conditions for software usage, and then choose *Accept Terms*. +
+  A confirmation page loads, and an email confirmation is sent to the account owner. For detailed subscription instructions, see the https://aws.amazon.com/marketplace/help/200799470[AWS Marketplace documentation^].
+
+. When the subscription process is complete, exit out of AWS Marketplace without further action. *Do not* provision the software from AWS Marketplace—the Quick Start deploys the AMI for you.
+endif::marketplace_subscription[]
+// \Not to be edited
+
+=== Deployment Options
+
+
+The Biotech Blueprint is built with the AWS CDK which allows for two deployment options. 
+
+If you just want to get going ASAP, follow Deployment Option 1. 
+
+If you value the principles of infrastructure as code, want to cleanly manage/adapt/update the architecture over time using code, or you already aware of how awesome the [AWS CDK](https://aws.amazon.com/cdk/) is, follow Deployment Option 2.
+
+Both deployment options take about {deployment_time} to complete to complete.
+
+=== Deployment Option 1: AWS CloudFormation Deployment (quick and easy)
+
+. Sign in to your AWS account, and click the deploy link below to launch the AWS CloudFormation template. 
+
+[cols=2*]
+|===
+^|http://qs_launch_link[Deploy {partner-product-short-name} into your AWS Account^]
+^|http://qs_template_link[View template^]
+|===
+
+
+[start=2]
+. Check the AWS Region that’s displayed in the upper-right corner of the navigation bar, and change it if necessary. This is where the network infrastructure for {partner-product-short-name} will be built. The template is launched in the {default_deployment_region} Region by default.
+
+// *Note:* This deployment includes Amazon EFS, which isn’t currently supported in all AWS Regions. For a current list of supported Regions, see the https://docs.aws.amazon.com/general/latest/gr/elasticfilesystem.html[endpoints and quotas webpage].
+
+[start=3]
+. On the *Create stack* page, keep the default setting for the template URL, and then choose *Next*.
+. On the *Specify stack details* page, change the stack name if needed. There are no parameters you need to supply.
+
+
+=== Deployment Option 2: AWS CDK Deployment
+
+First you need to make sure you have the AWS CDK installed on your development machine. 
+
+* https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_prerequisites[CDK Prerequiesites]
+
+* https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_install[Install the AWS CDK]
+
+* Clone the repo, build the project, and then boostrap your AWS account for the AWS CDK.
+```bash
+git clone https://github.com/aws-samples/aws-startup-blueprint.git
+npm run build 
+cdk bootstrap
+```
+
+* Feel free to review the code and make any changes you see fit. For example, you might want to use different VPC CIDR ranges (`aws-vpcs.ts`) or a different internal DNS apex (`aws-dns.ts` defaults to corp). 
+
+When you are ready, or when you need update the blueprint's architecture in the future based on changes you make, you just need to run:
+
+```bash 
+npm run build && cdk deploy
+```
+
+=== Connect to the VPN
+
+In order for you to route into the private subnets in the VPCs, you need to connect to the VPN. The blueprint has deployed a client vpn endpoint in the Management vpc that will NAT traffic over peering connections into the Production and Development vpcs. We are using the Management VPC as a hub VPC for networking into other VPCs. The Development and Production environments are designed to NOT be able to communicate with each other.
+
+
+:xrefstyle: short
+[#vpn1]
+.VPN routing rules in the {partner-product-short-name} on AWS
+[link=VPNRoutingDiagram.png]
+image::VPNRoutingDiagram.png[VPN,width=100%,height=100%]
+
+
+Once the deployment is complete, go to the https://console.aws.amazon.com/vpc/home?#ClientVPNEndpoints:sort=clientVpnEndpointId[Client VPN Endpoint section in the AWS VPC web console]. Select the Client VPN Endpoint listed and click the "Download Client Configuration" button. Your browser will download a downloaded-client-config.ovpn file.
+
+image::downloadclientconfig.png[VPN,width=100%,height=100%]
+
+Now go to the AWS S3 web console and open the bucket prefixed awsstartupblueprintstack-clientvpnvpnconfigbucket*. You will see 5 files listed. Download the `client1.domain.tld.key` and `client1.domain.tld.crt`. The other three files are the CA chain and server key/cert. You will need those if you want to create additional client certificates later on. For now, you just need `client1.domain.tld.key` and `client1.domain.tld.crt`.
+
+At this point we have to edit make some tweaks to the downloaded-client-config.ovpn file so open it in a text editor:
+
+
+Add the following lines to the bottom of the file, replace the contents of the two files inside the respective `<cert>` and `<key>` sections.
+
+```
+....
+<cert>
+Contents of client certificate (client1.domain.tld.crt) file
+</cert>
+
+<key>
+Contents of private key (client1.domain.tld.key) file
+</key>
+```
+
+Save the downloaded-client-config.ovpn. You should be able to open/import that file with any OpenVPN client. 
+
+AWS offers is own lightweight VPN client that works on most operating systems. https://docs.aws.amazon.com/vpn/latest/clientvpn-user/connect-aws-client-vpn-connect.html[Install and usage instructions here.]
+
+Usage instructions for other OpenVPN clients like https://openvpn.net/download-open-vpn/[OpenVPN Connect] can be found https://docs.aws.amazon.com/vpn/latest/clientvpn-user/connect.html[in our docs]
+
+
+=== Where to go from here?
+Once you are connected to the VPN, you essentially have a private encrypted channel into your new VPCs. You can now connect to any resources you launch into your VPCs using private IP addresses without having to hassle with insecure/public bastion hosts. 
+
+Are you unsure where to launch your first server? If you are confused about which VPC and/or which subnets you should be deploying resources into, check out the FAQ section. We did our best to explain some of the theory and give some concrete examples.  
+
+We've filled out some of the subnets in the diagram below to give an generalized example of the sorts of things you may end up deploying into your VPCs and subnets.
+
+image::bb-diagram-filled-out.png[bbdiagramfilledout,width=100%,height=100%]
+
+=== (Optional) Enable Biotech Blueprint Informatics Catalog
+
+All of the informatics and scientific computing tools mentioned earlier in this guide are made available to you through the AWS Service Catalog as the `Biotech Blueprint Informatics Catalog`. 
+
+Service Catalog requires that you explicitly give permissions to individual IAM users/groups/roles to launch products from a Service Catalog portfolio. 
+
+To grant that permission you first need to visit the https://console.aws.amazon.com/servicecatalog/home?#portfolios?activeTab=localAdminPortfolios[Service Catalog Portfolio Console]. 
+
+Click on the `Biotech Blueprint Informatics Catalog` portfolio and then the `Groups, roles, and users` tab. 
+
+image::service-catalog-permission.png[scpermission,width=100%,height=100%]
+
+Click on the `Add groups, users, and roles` button and select any IAM users/groups/roles that you want grant permissions to. *Make sure you add yourself.*
+
+Anyone you just added can now visit the https://us-east-1.console.aws.amazon.com/servicecatalog/home?isSceuc=true&region=us-east-1#/products['Products list' section of the Service Catalog console] and deploy any of the tools listed.
+
+Please reference the following documentation pages for tool specific deployment and usage instructions
+
+* https://aws.amazon.com/marketplace/pp/B077F6VV3B?qid=1553611079631[ChemAxon Compound Registry]
+* https://fwd.aws/RvJpR[Dotmatics Suite]
+* https://aws-quickstart.github.io/quickstart-hail/[Hail 0.2 on EMR]
+* https://fwd.aws/KNmPd[Mosaic FreezerMangement]
+* https://fwd.aws/B4VnD[Nextflow]
+** https://docs.opendata.aws/genomics-workflows/orchestration/nextflow/nextflow-overview/[Source Documentation]
+
+
+=== (Optional) DNS Setup
+A private DNS is setup by the Blueprint with `.corp` (default) as the apex domain using https://console.aws.amazon.com/route53/v2/home#Dashboard[Amazon Route 53 in your account]. From there, you can create private A or CNAME records to any private resources you create. 
+
+For example, you may decide to launch a development server that gets a private IP like `10.60.0.198`. Instead of you having to remember that IP, you can create an 'A' record in the .corp Route 53 hosted zone for `pauls-machine.corp` to the private IP `10.60.0.198`. Resources in all three VPCs, and clients connected to the Client VPN Endpoint, will then all be able to resolve `pauls-machine.corp` from a browser, terminal, api call, etc.
