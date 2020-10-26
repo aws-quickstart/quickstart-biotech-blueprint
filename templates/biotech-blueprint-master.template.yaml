@@ -365,8 +365,6 @@ Resources:
         pClientCidr: !Ref pClientCidr
         pTargetNetworkCidr: !Ref pTargetNetworkCidr
         QSS3BucketName: !Ref QSS3BucketName
-        QSS3BucketRegion: !Ref QSS3BucketRegion
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
   rServiceCatalog:
     Type: AWS::CloudFormation::Stack
     DependsOn:
