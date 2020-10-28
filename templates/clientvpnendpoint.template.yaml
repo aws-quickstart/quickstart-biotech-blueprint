@@ -46,7 +46,7 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<CommaDelimitedList>
     Default: /BB/Networking/VPN/RoutableOctets
   QSS3BucketName:
-    Default: /BB/QuickStart/QSS3BucketName
+    Default: aws-quickstart
     Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
@@ -56,7 +56,7 @@ Parameters:
     Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
     Type: String
   QSS3KeyPrefix:
-    Default: /BB/QuickStart/QSS3KeyPrefix
+    Default: quickstart-biotech-blueprint/
     Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), and
       forward slash (/).
@@ -80,13 +80,18 @@ Resources:
           import urllib.request
           import sys
           import json
-          
+          import boto3
+
+
           def handlerShim(event, context):
             
               try: 
-                targetScriptUrl = event['ResourceProperties']['HandlerShimUrl']
+                print(event)
                 tmpFileName = "/tmp/handlermeat.py"
-                urllib.request.urlretrieve(targetScriptUrl, tmpFileName)
+                
+                s3 = boto3.client('s3')
+                s3.download_file(event['ResourceProperties']['HandlerShimBucket'], event['ResourceProperties']['HandlerShimObjectName'], tmpFileName)
+                
                 sys.path.insert(0, '/tmp/')
                 import handlermeat 
                 handlermeat.lambda_handler(event, context)     
@@ -144,6 +149,8 @@ Resources:
       VpcId: !Ref pVpcId
       DNSServerIP: !Sub "${pVpcAandBClassProvidingDns}.0.2"
       VpcAandBClassToRoutableNetworks: !Ref pVpcAandBClassToRoutableNetworks
+      HandlerShimBucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      HandlerShimObjectName: !Sub "${QSS3KeyPrefix}scripts/clientvpnendpoint-customlambdaresource.py"
       HandlerShimUrl: 
         !Sub
           - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/clientvpnendpoint-customlambdaresource.py'
@@ -181,6 +188,13 @@ Resources:
         PolicyDocument:
           Version: 2012-10-17
           Statement:
+          - Effect: Allow
+            Action:
+            - s3:GetObject
+            Resource:  
+              !Sub
+                - 'arn:aws:s3:::${S3Bucket}/${QSS3KeyPrefix}scripts/clientvpnendpoint-customlambdaresource.py'
+                - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
           - Effect: Allow
             Action:
             - ssm:GetParameter
