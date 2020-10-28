@@ -3,10 +3,11 @@ project:
   owner: quickstart-eng@amazon.com
   shorten_stack_name: true
   package_lambda: false
+  s3_regional_buckets: true
   regions:
-    - eu-west-1
     - us-east-1
     - us-west-2
+    - eu-west-1
 tests:
   quickstart-biotech-blueprintt1:
     parameters:
@@ -25,5 +26,5 @@ tests:
     regions:
       - us-east-1
       - us-west-2
-      - eu-west-1
+      - eu-west-1 
     template: templates/biotech-blueprint-master.template.yaml
